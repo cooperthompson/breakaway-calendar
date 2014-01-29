@@ -36,9 +36,13 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'breakaway',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': 'localhost',
+        'PORT': '',
+    },
 }
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
@@ -120,6 +124,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'debug_toolbar',
     'breakaway',
 )
 
@@ -127,3 +132,10 @@ ROOT_URLCONF = 'ctcom.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'ctcom.wsgi.application'
+
+TIME_INPUT_FORMATS = ('%I:%M %p',)
+TIME_FORMAT = ('%I:%M %p',)
+
+DATETIME_INPUT_FORMATS = ('%m/%d/%Y %I:%M %p',)
+SHORT_DATETIME_FORMATS = ('%m/%d/%Y %I:%M %p',)
+DATETIME_FORMATS = ('%m/%d/%Y %I:%M %p',)

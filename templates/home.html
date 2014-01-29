@@ -13,7 +13,7 @@
                     <ul class="dropdown-menu" role="menu" aria-labelledby="league-dropdown">
                         {% for team in league.teams.all %}
                             <li role="presentation">
-                                <a role="menuitem" href="#">{{ team }}</a>
+                                <a role="menuitem" href="/team/{{ team.id }}/">{{ team }}</a>
                             </li>
                         {% endfor %}
                     </ul>

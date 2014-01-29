@@ -1,5 +1,6 @@
 import pdb
 import re
+import os
 import shlex
 import tempfile
 from datetime import datetime, timedelta, date
@@ -15,17 +16,31 @@ class Command(BaseCommand):
     help = 'Import the BreakAway PDF schedule into the Django model'
 
     def handle(self, *args, **options):
-        pdf_file = r'C:\Users\cooper\PycharmProjects\ctcom\scripts\data\142650-857601.adultcoedw21314.pdf'
-        self.stdout.write('Loading %s' % pdf_file)
+        pdf_filename = r'C:\Users\cooper\PycharmProjects\ctcom\scripts\data\142650-857601.adultcoedw21314.pdf'
+        self.stdout.write('Loading %s' % pdf_filename)
 
-        get_teams(pdf_file)
-        return
-        get_games(pdf_file)
+        if os.name == "nt":  # windows
+            # on windows, use pre-processed text files for testing, since
+            # pdftotext doesn't do the same layouting as it does on linux
+            text_layout_filename = r'C:\Users\cooper\Desktop\142650-857601.adultcoedw21314-layout.txt'
+            text_filename = r'C:\Users\cooper\Desktop\142650-857601.adultcoedw21314.txt'
 
-        for team in Team.objects.all():
-            create_ics(team)
+            with open(text_layout_filename, 'r') as text_file:
+                get_teams(text_file)
 
-        self.stdout.write('Successfully imported "%s"' % pdf_file)
+            with open(text_filename, 'r') as text_file:
+                get_games_non_layout(text_file)
+
+        else:  # linux
+            with open(pdf_filename, 'r') as pdf_file:
+                text_file = ConvertPDFToText(pdf_file, 0)  # non-layout version
+                get_teams(text_file)
+
+            with open(pdf_filename, 'r') as pdf_file:
+                text_file = ConvertPDFToText(pdf_file, 1)  # layout version
+                get_games_non_layout(text_file)
+
+        self.stdout.write('Successfully imported "%s"' % pdf_filename)
 
 
 def ConvertPDFToText(pdf_file, layout):
@@ -53,11 +68,7 @@ def ConvertPDFToText(pdf_file, layout):
     return outputTf
 
 
-def get_games(filename):
-    # Use the non-layout version to parse out the teams.
-    with open(filename, 'r') as pdf_file:
-        text_file = ConvertPDFToText(pdf_file, 1)
-
+def get_games(text_file):
     mode = "start"
 
     dates = []
@@ -85,7 +96,7 @@ def get_games(filename):
             print "dateline: %s" % date_line
             for day, dt in group(date_line, 2):
                 date_string = "%s %s" % (day, dt)
-                game_date = parse_pdf_date(date_string)
+                game_date = parse_pdf_datetime(date_string)
                 print game_date.strftime("%A, %B %d,  %Y")
                 dates.append(game_date)
 
@@ -99,6 +110,79 @@ def get_games(filename):
                 game_date = dates[date_index]
                 date_index += 1
                 save_game(game, time, game_date)
+
+
+def get_games_non_layout(text_file):
+    mode = "start"
+    game_date = datetime.now()
+
+    Game.objects.all().delete() # clear out existing games
+
+    while True:
+        line = text_file.readline()
+        if not line:
+            break  # EOF
+
+        if line.strip() == "TEAM (COLOR)":
+            mode = "team"
+        if line.strip() == "GOOD LUCK & HAVE FUN!":
+            mode = "team-complete"
+        if line.strip() == "WEEK 1":
+            mode = "sched"
+        if line.strip() == "IMPORTANT EVERYONE READ!":
+            mode = "sched-complete"
+
+        match = re.match("(\w+)\.(\w+)\.\s+(\d+)", line)
+        if mode == "sched" and match:
+            game_date = line
+
+        match = re.match("(\d+)-(\d+) (\d+:\d{2})(\d?)", line)
+        if mode == "sched" and match:
+            home_team = Team.objects.get(id=int(match.group(1)))
+            away_team = Team.objects.get(id=int(match.group(2)))
+            game_time = match.group(3)
+            field = match.group(4)
+            if not field:
+                field = 1
+
+            game_time = parse_pdf_datetime(game_date, game_time)
+            game = Game(home_team=home_team,
+                        away_team=away_team,
+                        time=game_time,
+                        field=field)
+            print game
+            game.save()
+
+        # handle the case where pdftotext didn't get the splitting right
+        match_time = re.match("(\d+:\d{2})(\d?)$", line)
+        match_mtch = re.match("(\d+)-(\d+)$", line)
+        if mode == "sched" and (match_time or match_mtch):
+            line2 = text_file.readline()
+            if not line2:
+                break  # EOF
+
+            if match_time:
+                match_mtch = re.match("(\d+)-(\d+)$", line2)
+            elif match_mtch:
+                match_time = re.match("(\d+:\d{2})(\d?)$", line2)
+
+            home_team = Team.objects.get(id=int(match_mtch.group(1)))
+            away_team = Team.objects.get(id=int(match_mtch.group(2)))
+            game_time = match_time.group(1)
+            field = match_time.group(2)
+            if not field:
+                field = 1
+
+            game_time = parse_pdf_datetime(game_date, game_time)
+
+            game = Game(home_team=home_team,
+                        away_team=away_team,
+                        time=game_time,
+                        field=field)
+            print game
+            game.save()
+
+    return
 
 
 def fix_line(lex_line):
@@ -143,11 +227,15 @@ def group(lst, n):
             yield tuple(val)
 
 
-def parse_pdf_date(date_string):
-    match = re.match("(\w{2,3})\.(\w{3}).*?(\d+)", date_string)
-    if match:
-        game_mo = match.group(2)
-        game_dt = match.group(3)
+def parse_pdf_datetime(date_string, time_string):
+    match_date = re.match("(\w{2,3})\.(\w{3}).*?(\d+)", date_string)
+    match_time = re.match("(\d+):(\d{2})", time_string)
+
+    if match_date and match_time:
+        game_mo = match_date.group(2)
+        game_dt = int(match_date.group(3))
+        game_hr = int(match_time.group(1))
+        game_mn = int(match_time.group(2))
 
         game_month = datetime.strptime(game_mo, '%b').month  # convert string format to month number
         if game_month == 12:
@@ -155,8 +243,11 @@ def parse_pdf_date(date_string):
         else:
             game_year = 2014
 
+        game_hr += 12  # covert to 24 hour time.  Always assume games are in the evening..
+
         game_dt = int(game_dt)
-        game_datetime = date(game_year, game_month, game_dt)
+        game_datetime = datetime(game_year, game_month, game_dt, game_hr, game_mn)
+        #print game_datetime.strftime("%A, %B %d,  %Y  %I:%M %p")
     else:
         print date_string
         game_datetime = None
@@ -185,11 +276,7 @@ def process_game_line_nolayout(lex_line):
         print game
 
 
-def get_teams(filename):
-    # Use the layout version to parse out the teams.
-    with open(filename, 'r') as pdf_file:
-        text_file = ConvertPDFToText(pdf_file, 1)
-
+def get_teams(text_file):
     mode = "start"
 
     for line in text_file:
@@ -234,7 +321,7 @@ def save_team(team_id, team_name):
     if match:
         team_name = match.group(1)
         team_color = match.group(2)
-    league = League.objects.get(id=3)
+    league = League.objects.get(id=1)
     try:
 
         team = Team(id=int(team_id),

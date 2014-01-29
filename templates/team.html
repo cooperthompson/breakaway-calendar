@@ -1,0 +1,35 @@
+{% extends "home.html" %}
+{% load staticfiles %}
+
+{% block topnav %}
+    <div id="topnav">
+        <ul>
+            {% for league in leagues %}
+                <li class="dropdown topnav-option">
+                    <a id="league-dropdown" data-toggle="dropdown" href="#" role="button">
+                        {{ league }}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="league-dropdown">
+                        {% for team in league.teams.all %}
+                            <li role="presentation">
+                                <a role="menuitem" href="/team/{{ team.id }}/">{{ team }}</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+{% endblock %}
+
+{% block content %}
+    <ul>
+    {% for game in games %}
+        <li>
+            {{ game }}
+        </li>
+    {% endfor %}
+    </ul>
+{% endblock %}
