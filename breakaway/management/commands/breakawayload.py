@@ -13,6 +13,7 @@ from icalendar import Calendar, Event
 from breakaway.models import *
 from django.conf import settings
 
+
 class Command(BaseCommand):
     args = '<pdf_file pdf_file ...>'
     help = 'Import the BreakAway PDF schedule into the Django model'
@@ -56,11 +57,13 @@ class Command(BaseCommand):
         urllib.urlretrieve(url_pdf_file, local_pdf_filename)
 
         with open(local_pdf_filename, 'r') as pdf_file:
-            text_file = self.ConvertPDFToText(pdf_file, 0)  # non-layout version
+            text_filename = self.ConvertPDFToText(pdf_file, 0)  # non-layout version
+            text_file = open(text_filename, "r")
             self.get_teams(text_file)
 
         with open(local_pdf_filename, 'r') as pdf_file:
-            text_file = self.ConvertPDFToText(pdf_file, 1)  # layout version
+            text_filename = self.ConvertPDFToText(pdf_file, 1)  # layout version
+            text_file = open(text_filename, "r")
             self.get_games_non_layout(text_file)
 
         self.stdout.write('Successfully imported "%s"' % pdf_filename)
@@ -73,21 +76,26 @@ class Command(BaseCommand):
             layout or non-layout text document
         @return: text version of the PDF
         """
-        outputTf = tempfile.NamedTemporaryFile(delete=False)
+
+        base, ext = os.path.splitext(os.path.basename(pdf_file.name))
+        if layout:
+            text_filename = os.path.join(settings.BASE_DIR, "import", "%s-layout.txt" % base)
+        else:
+            text_filename = os.path.join(settings.BASE_DIR, "import", "%s-plain.txt" % base)
 
         if layout:
-            cmd = "pdftotext -layout '%s' '%s'" % (pdf_file.name, outputTf.name)
+            cmd = "pdftotext -layout '%s' '%s'" % (pdf_file.name, text_filename)
             proc = subprocess.Popen(shlex.split(cmd))
             out, err = proc.communicate()
         else:
-            cmd = "pdftotext '%s' '%s'" % (pdf_file.name, outputTf.name)
+            cmd = "pdftotext '%s' '%s'" % (pdf_file.name, text_filename)
             proc = subprocess.Popen(shlex.split(cmd))
             out, err = proc.communicate()
 
         if err:
             self.stdout.write("ERROR: %s" % err)
 
-        return outputTf
+        return text_filename
 
     def get_games(self, text_file):
         mode = "start"
