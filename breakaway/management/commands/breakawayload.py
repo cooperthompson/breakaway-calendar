@@ -3,6 +3,7 @@ import re
 import os
 import shlex
 import tempfile
+import urllib
 import shortuuid
 import urllib2
 import subprocess
@@ -10,7 +11,7 @@ from datetime import datetime, timedelta, date
 from django.core.management.base import BaseCommand
 from icalendar import Calendar, Event
 from breakaway.models import *
-
+from django.conf import settings
 
 class Command(BaseCommand):
     args = '<pdf_file pdf_file ...>'
@@ -37,7 +38,7 @@ class Command(BaseCommand):
         self.season.save()
 
         for match in matches:
-            pdf_files.append("http://breakawaysports.com%s" % match)
+            pdf_files.append(match)
 
         return pdf_files
 
@@ -50,29 +51,15 @@ class Command(BaseCommand):
                              season=self.season)
         self.league.save()
 
-        # just some test stuff for windows
-        if os.name == "nt" and False:  # windows
-            # on windows, use pre-processed text files for testing, since
-            # pdftotext doesn't do the same layouting as it does on linux
-            text_layout_filename = r'C:\Users\cooper\Desktop\142650-857601.adultcoedw21314-layout.txt'
-            text_filename = r'C:\Users\cooper\Desktop\142650-857601.adultcoedw21314.txt'
+        url_pdf_file = "http://breakawaysports.com%s" % pdf_filename
+        local_pdf_filename = os.path.join(settings.BASE_DIR, "import", os.path.basename(pdf_filename))
+        urllib.urlretrieve(url_pdf_file, local_pdf_filename)
 
-            with open(text_layout_filename, 'r') as text_file:
-                self.get_teams(text_file)
-
-            with open(text_filename, 'r') as text_file:
-                self.get_games_non_layout(text_file)
-
-        pdf_file = urllib2.urlopen(pdf_filename)
-        local_pdf_file = tempfile.NamedTemporaryFile(delete=False)
-        local_pdf_file.write(pdf_file.read())
-        local_pdf_file.close()
-
-        with open(local_pdf_file.name, 'r') as pdf_file:
+        with open(local_pdf_filename, 'r') as pdf_file:
             text_file = self.ConvertPDFToText(pdf_file, 0)  # non-layout version
             self.get_teams(text_file)
 
-        with open(local_pdf_file.name, 'r') as pdf_file:
+        with open(local_pdf_filename, 'r') as pdf_file:
             text_file = self.ConvertPDFToText(pdf_file, 1)  # layout version
             self.get_games_non_layout(text_file)
 
@@ -333,7 +320,8 @@ class Command(BaseCommand):
             match = re.match("\s*(\d+)\.?\s+(.*)$", line)
 
         if match is None:
-            print "Unmatched: %s" % line
+            self.stderr.write("Unmatched: %s" % line)
+            return
 
         self.save_team(match.group(1), match.group(2))
 
