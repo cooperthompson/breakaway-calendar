@@ -38,7 +38,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'breakaway',
-        'USER': 'breakaway',
+        'USER': 'postgres',
         'PASSWORD': 'ding,dong1',
         'HOST': 'localhost',
         'PORT': '',

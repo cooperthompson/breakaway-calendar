@@ -17,7 +17,7 @@ class League(models.Model):
 
 
 class Team(models.Model):
-    id = models.IntegerField(primary_key=True)
+    number = models.IntegerField()
     name = models.CharField(max_length=100)
     color = models.CharField(max_length=100)
     league = models.ForeignKey('League', related_name='teams')
@@ -26,7 +26,7 @@ class Team(models.Model):
         ordering = ['id']
 
     def __unicode__(self):
-        return "[%s] %s (%s)" % (self.id, self.name, self.color)
+        return "[%s] %s (%s)" % (self.number, self.name, self.color)
 
 
 class Game(models.Model):
