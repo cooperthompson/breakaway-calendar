@@ -1,0 +1,14 @@
+{% extends "home.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <br><br>
+    <ul>
+        {% for team in league.teams.all %}
+            <li role="presentation">
+                <a role="menuitem" href="/team/{{ team.id }}/">{{ team }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}

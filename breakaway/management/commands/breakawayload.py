@@ -319,8 +319,8 @@ def save_team(team_id, team_name):
     team_name = team_name.rstrip()
     match = re.match("(.*)\((.*)\)", team_name)
     if match:
-        team_name = match.group(1)
-        team_color = match.group(2)
+        team_name = match.group(1).strip()
+        team_color = match.group(2).strip()
     league = League.objects.get(id=1)
     try:
 

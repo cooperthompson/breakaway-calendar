@@ -4,27 +4,35 @@
 {% block topnav %}
     <div id="topnav">
         <ul>
-            {% for league in leagues %}
-                <li class="dropdown topnav-option">
-                    <a id="league-dropdown" data-toggle="dropdown" href="#" role="button">
-                        {{ league }}
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu" role="menu" aria-labelledby="league-dropdown">
-                        {% for team in league.teams.all %}
-                            <li role="presentation">
-                                <a role="menuitem" href="/team/{{ team.id }}/">{{ team }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </li>
-            {% endfor %}
+            <li class="topnav-option">
+                <a id="master-schedule" role="button" href="/">
+                    Master Schedule
+                </a>
+            </li>
+            <li class="dropdown topnav-option">
+                <a id="league-dropdown" data-toggle="dropdown" href="#" role="button">
+                    Leagues
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu" aria-labelledby="league-dropdown">
+                    {% for league in leagues %}
+                        <li role="presentation">
+                            <a role="menuitem" href="/league/{{ league.id }}/">{{ league }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
         </ul>
     </div>
 
 {% endblock %}
 
 {% block content %}
-
-
+    <iframe src="https://www.google.com/calendar/embed?showTitle=0&amp;showPrint=0&amp;mode=DAY&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=cooper.thompson%40gmail.com&amp;color=%232952A3&amp;ctz=America%2FChicago"
+            style=" border-width:0 "
+            width="600"
+            height="600"
+            frameborder="0"
+            scrolling="no">
+    </iframe>
 {% endblock %}

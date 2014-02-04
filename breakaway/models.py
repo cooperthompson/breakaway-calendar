@@ -13,7 +13,7 @@ class League(models.Model):
     season = models.ForeignKey('Season', related_name='leagues')
 
     def __unicode__(self):
-        return "%s (%s)" % (self.name, self.id)
+        return "%s" % self.name
 
 
 class Team(models.Model):
@@ -26,7 +26,7 @@ class Team(models.Model):
         ordering = ['id']
 
     def __unicode__(self):
-        return "[%s] %s [%s]" % (self.id, self.name, self.color)
+        return "[%s] %s (%s)" % (self.id, self.name, self.color)
 
 
 class Game(models.Model):
