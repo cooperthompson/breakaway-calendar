@@ -37,7 +37,7 @@ class Command(BaseCommand):
         self.season.save()
 
         for match in matches:
-            pdf_files.append(match)
+            pdf_files.append("http://breakawaysports.com/%s" % match)
 
         return pdf_files
 
@@ -50,6 +50,7 @@ class Command(BaseCommand):
                              season=self.season)
         self.league.save()
 
+        # just some test stuff for windows
         if os.name == "nt":  # windows
             # on windows, use pre-processed text files for testing, since
             # pdftotext doesn't do the same layouting as it does on linux
@@ -63,11 +64,16 @@ class Command(BaseCommand):
                 self.get_games_non_layout(text_file)
 
         else:  # linux
-            with open(pdf_filename, 'r') as pdf_file:
+            pdf_file = urllib2.urlopen(pdf_filename)
+            local_pdf_file = tempfile.NamedTemporaryFile(delete=False)
+            local_pdf_file.write(pdf_file)
+            local_pdf_file.close()
+
+            with open(local_pdf_file, 'r') as pdf_file:
                 text_file = self.ConvertPDFToText(pdf_file, 0)  # non-layout version
                 self.get_teams(text_file)
 
-            with open(pdf_filename, 'r') as pdf_file:
+            with open(local_pdf_file, 'r') as pdf_file:
                 text_file = self.ConvertPDFToText(pdf_file, 1)  # layout version
                 self.get_games_non_layout(text_file)
 
