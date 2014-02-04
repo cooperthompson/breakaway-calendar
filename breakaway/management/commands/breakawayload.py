@@ -37,7 +37,7 @@ class Command(BaseCommand):
         self.season.save()
 
         for match in matches:
-            pdf_files.append("http://breakawaysports.com/%s" % match)
+            pdf_files.append("http://breakawaysports.com%s" % match)
 
         return pdf_files
 
@@ -51,7 +51,7 @@ class Command(BaseCommand):
         self.league.save()
 
         # just some test stuff for windows
-        if os.name == "nt":  # windows
+        if os.name == "nt" and False:  # windows
             # on windows, use pre-processed text files for testing, since
             # pdftotext doesn't do the same layouting as it does on linux
             text_layout_filename = r'C:\Users\cooper\Desktop\142650-857601.adultcoedw21314-layout.txt'
@@ -63,19 +63,18 @@ class Command(BaseCommand):
             with open(text_filename, 'r') as text_file:
                 self.get_games_non_layout(text_file)
 
-        else:  # linux
-            pdf_file = urllib2.urlopen(pdf_filename)
-            local_pdf_file = tempfile.NamedTemporaryFile(delete=False)
-            local_pdf_file.write(pdf_file)
-            local_pdf_file.close()
+        pdf_file = urllib2.urlopen(pdf_filename)
+        local_pdf_file = tempfile.NamedTemporaryFile(delete=False)
+        local_pdf_file.write(pdf_file.read())
+        local_pdf_file.close()
 
-            with open(local_pdf_file, 'r') as pdf_file:
-                text_file = self.ConvertPDFToText(pdf_file, 0)  # non-layout version
-                self.get_teams(text_file)
+        with open(local_pdf_file.name, 'r') as pdf_file:
+            text_file = self.ConvertPDFToText(pdf_file, 0)  # non-layout version
+            self.get_teams(text_file)
 
-            with open(local_pdf_file, 'r') as pdf_file:
-                text_file = self.ConvertPDFToText(pdf_file, 1)  # layout version
-                self.get_games_non_layout(text_file)
+        with open(local_pdf_file.name, 'r') as pdf_file:
+            text_file = self.ConvertPDFToText(pdf_file, 1)  # layout version
+            self.get_games_non_layout(text_file)
 
         self.stdout.write('Successfully imported "%s"' % pdf_filename)
 
@@ -348,15 +347,16 @@ class Command(BaseCommand):
         if match:
             team_name = match.group(1).strip()
             team_color = match.group(2).strip()
-        try:
-
-            team = Team(number=int(team_id),
-                        name=team_name,
-                        color=team_color,
-                        league=self.league)
-            team.save()
-        except Exception as e:
-            self.stdout.write("[%s] - %s (%s)" % (team_id, team_name, team_color))
+            try:
+                team = Team(number=int(team_id),
+                            name=team_name,
+                            color=team_color,
+                            league=self.league)
+                team.save()
+            except Exception as e:
+                self.stdout.write("[%s] - %s (%s)" % (team_id, team_name, team_color))
+        else:
+            self.stderr.write("No name/color found.")
 
     @staticmethod
     def create_ics(team):
