@@ -171,6 +171,7 @@ class Command(BaseCommand):
                             away_team=away_team,
                             time=game_time,
                             field=field)
+                self.stdout.write("Loaded game %s" % repr(game))
                 game.save()
 
             # handle the case where pdftotext didn't get the splitting right
