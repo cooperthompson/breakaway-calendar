@@ -25,7 +25,7 @@ class Team(models.Model):
     league = models.ForeignKey('League', related_name='teams')
 
     class Meta:
-        ordering = ['id']
+        ordering = ['number']
 
     def __unicode__(self):
         return "[%s] %s (%s)" % (self.number, self.name, self.color)

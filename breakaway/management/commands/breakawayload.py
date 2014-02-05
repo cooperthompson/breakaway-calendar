@@ -120,8 +120,8 @@ class Command(BaseCommand):
         mode = "start"
         game_date = "0"
 
-        if self.league.key != "coedsocialw31314":
-            return
+        #if self.league.key != "coedsocialw31314":
+        #    return
 
         while True:
             line = text_file.readline()
@@ -174,12 +174,19 @@ class Command(BaseCommand):
                     return
 
                 game_time = self.parse_pdf_datetime(game_date, game_time)
+                if not game_time:
+                    self.stdout.write("Unable to determine game date/time: %s/%s" % (game_date, game_time))
+                    return
+
                 game = Game(home_team=home_team,
                             away_team=away_team,
                             time=game_time,
                             field=field)
                 self.stdout.write("Loaded game %s" % repr(game))
-                game.save()
+                try:
+                    game.save()
+                except Exception as e:
+                    pdb.set_trace()
 
             # handle the case where pdftotext didn't get the splitting right
             match_time = re.match("(\d+:\d{2})(\d?)$", line)
@@ -222,6 +229,9 @@ class Command(BaseCommand):
                     field = 1
 
                 game_time = self.parse_pdf_datetime(game_date, game_time)
+                if not game_time:
+                    self.stdout.write("Unable to determine game date/time: %s/%s" % (game_date, game_time))
+                    return
 
                 game = Game(home_team=home_team,
                             away_team=away_team,
@@ -235,7 +245,6 @@ class Command(BaseCommand):
     def parse_pdf_datetime(self, date_string, time_string):
         match_date = re.match("(\w{2,3})\.(\w{3}).*?(\d+)", date_string)
         match_time = re.match("(\d+):(\d{2})", time_string)
-
 
         if match_date and match_time:
             game_mo = match_date.group(2)
