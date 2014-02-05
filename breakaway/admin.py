@@ -16,6 +16,7 @@ class SeasonAdmin(admin.ModelAdmin):
 class TeamInline(admin.TabularInline):
     model = Team
     fk_name = 'league'
+    ordering = ('number', )
 
 
 class LeagueAdmin(admin.ModelAdmin):

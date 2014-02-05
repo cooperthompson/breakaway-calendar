@@ -5,7 +5,6 @@ import urllib
 import urllib2
 import subprocess
 from django.core.management.base import BaseCommand
-from breakaway.models import *
 from django.conf import settings
 
 
@@ -15,6 +14,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         pdf_files = self.get_pdf_files()
+
+        if os.name == "nt":
+            self.stderr.write("You probably don't want to run this on Windows...")
+            return
 
         for pdf_filename in pdf_files:
             self.process_file(pdf_filename)
