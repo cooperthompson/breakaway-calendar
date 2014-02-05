@@ -11,7 +11,7 @@ class Season(models.Model):
 
 class League(models.Model):
     name = models.CharField(max_length=100)
-    season = models.ForeignKey('Season', related_name='leagues', null=True)
+    season = models.ForeignKey('Season', related_name='leagues', null=True, blank=True)
     key = models.CharField(max_length=100)
 
     def __unicode__(self):
@@ -36,6 +36,9 @@ class Game(models.Model):
     away_team = models.ForeignKey('Team', related_name="away_team")
     time = models.DateTimeField()
     field = models.IntegerField(default=1)
+
+    class Meta:
+        ordering = ['time']
 
     def __unicode__(self):
         return "%s vs. %s @%s" % (self.home_team, self.away_team, self.time)
