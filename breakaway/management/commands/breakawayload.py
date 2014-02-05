@@ -5,7 +5,6 @@ import re
 import os
 import glob
 from django.core.management.base import BaseCommand
-import unicodedata
 from breakaway.models import *
 from django.conf import settings
 
@@ -121,6 +120,9 @@ class Command(BaseCommand):
         mode = "start"
         game_date = "0"
 
+        if self.league.key != "coedsocialw31314":
+            return
+
         while True:
             line = text_file.readline()
             if not line:
@@ -135,8 +137,12 @@ class Command(BaseCommand):
             if "IMPORTANT EVERYONE READ" in line.strip():
                 mode = "sched-complete"
 
+            if mode == "sched":
+                #print repr(line)
+                pass
+
             # regex check for the date row (i.e. Mo.Feb 3)
-            match = re.match("(\w+)\.(\w+)\.\s+(\d+)", line)
+            match = re.match("(\w+)\.?(\w+)\.?\s+(\d+)", line)
             if mode == "sched" and match:
                 game_date = line
 
@@ -148,13 +154,13 @@ class Command(BaseCommand):
                 try:
                     home_team = Team.objects.filter(league=self.league).get(number=home_team_number)
                 except Team.DoesNotExist:
-                    self.stderr.write("Couldn't find team %s in league %s" % (home_team_number, self.league))
+                    self.stdout.write("Couldn't find team %s in league %s" % (home_team_number, self.league))
                     return
 
                 try:
                     away_team = Team.objects.filter(league=self.league).get(number=away_team_number)
                 except Team.DoesNotExist:
-                    self.stderr.write("Couldn't find team %s in league %s" % (away_team_number, self.league))
+                    self.stdout.write("Couldn't find team %s in league %s" % (away_team_number, self.league))
                     return
 
                 game_time = match.group(3)
@@ -163,7 +169,8 @@ class Command(BaseCommand):
                     field = 1
 
                 if game_date == "0":
-                    self.stderr.write("Couldn't find the correct date info.")
+                    self.stdout.write("Couldn't find the correct date info.")
+                    self.stdout.write("   %s" % line)
                     return
 
                 game_time = self.parse_pdf_datetime(game_date, game_time)
@@ -193,21 +200,21 @@ class Command(BaseCommand):
                 try:
                     home_team = Team.objects.filter(league=self.league).get(number=home_team_number)
                 except Team.DoesNotExist:
-                    self.stderr.write("Couldn't find team %s in league %s" % (home_team_number, self.league))
+                    self.stdout.write("Couldn't find team %s in league %s" % (home_team_number, self.league))
                     return
 
                 try:
                     away_team = Team.objects.filter(league=self.league).get(number=away_team_number)
                 except Team.DoesNotExist:
-                    self.stderr.write("Couldn't find team %s in league %s" % (away_team_number, self.league))
+                    self.stdout.write("Couldn't find team %s in league %s" % (away_team_number, self.league))
                     return
 
                 try:
                     game_time = match_time.group(1)
                 except AttributeError as e:
-                    self.stderr.write("Unable to parse game info:")
-                    self.stderr.write("   line1: %s" % line)
-                    self.stderr.write("   line2: %s" % line2)
+                    self.stdout.write("Unable to parse game info:")
+                    self.stdout.write("   line1: %s" % line)
+                    self.stdout.write("   line2: %s" % line2)
                     return
 
                 field = match_time.group(2)
@@ -220,7 +227,7 @@ class Command(BaseCommand):
                             away_team=away_team,
                             time=game_time,
                             field=field)
-                print game
+                self.stdout.write("Loaded game %s" % repr(game))
                 game.save()
 
         return
