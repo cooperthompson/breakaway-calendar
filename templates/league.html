@@ -2,13 +2,26 @@
 {% load staticfiles %}
 
 {% block content %}
-    <br><br>
-    <ul>
+<div id="league-list" class=".container">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Team Name</th>
+                <th>Color</th>
+            </tr>
+        </thead>
+        <tbody>
         {% for team in league.teams.all %}
-            <li role="presentation">
-                <a role="menuitem" href="/team/{{ team.id }}/">{{ team }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+            <tr>
+                <td>{{ team.number }}</td>
+                <td><a role="menuitem" href="/team/{{ team.id }}/">{{ team.name }}</a></td>
+                <td>{{ team.color }}</td>
 
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
 {% endblock %}

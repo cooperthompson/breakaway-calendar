@@ -13,6 +13,7 @@ class League(models.Model):
     name = models.CharField(max_length=100)
     season = models.ForeignKey('Season', related_name='leagues', null=True, blank=True)
     key = models.CharField(max_length=100)
+    is_active = models.BooleanField(default=False)
 
     def __unicode__(self):
         return "%s" % self.name

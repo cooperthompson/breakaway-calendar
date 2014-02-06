@@ -13,6 +13,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 PROJECT_PATH = BASE_DIR
+DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
@@ -79,6 +81,8 @@ STATIC_ROOT = ''
 # URL prefix for static files.
 # Example: "http://example.com/static/", "http://static.example.com/"
 STATIC_URL = '/static/'
+
+ADMIN_MEDIA_PREFIX = '/media/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (

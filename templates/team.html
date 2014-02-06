@@ -2,16 +2,22 @@
 {% load staticfiles %}
 
 {% block content %}
-    <br><br>
-    <div class="game-list">
-        <a href="{% url 'ics' team.name %}">{{ team }}</a>
+    <div class="container">
+        <br>
+        <table class="table table-bordered table-striped">
+            <tr>
+                <td><a href="{% url 'ics' team.name %}">Download Calendar</a></td>
+                <td>Today is {% now "l, F jS, Y g:i a"%}</td>
+            </tr>
+        </table>
 
-        <table>
+        <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>Field</th>
                 <th>Home Team</th>
                 <th>Away Team</th>
+                <th>Game Date</th>
                 <th>Game Time</th>
             </tr>
         </thead>
@@ -31,7 +37,8 @@
                             {{ game.away_team.name }}
                         </a>
                     </td>
-                    <td>{{ game.time }}</td>
+                    <td>{{ game.time|date:"M d (l)" }}</td>
+                    <td>{{ game.time|time:"g:i a" }}</td>
                 </tr>
             {% endfor %}
         </tbody>

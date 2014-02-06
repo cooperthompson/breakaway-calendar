@@ -8,7 +8,7 @@ import shortuuid
 
 
 def home(request):
-    leagues = League.objects.all()
+    leagues = League.objects.filter(is_active=True)
     leagues.prefetch_related('teams')
 
     template = loader.get_template('home.html')
@@ -19,7 +19,7 @@ def home(request):
 
 
 def team(request, team_id):
-    leagues = League.objects.all()
+    leagues = League.objects.filter(is_active=True)
     leagues.prefetch_related('teams')
 
     this_team = Team.objects.get(id=team_id)
@@ -38,7 +38,7 @@ def team(request, team_id):
 
 
 def league(request, league_id):
-    leagues = League.objects.all()
+    leagues = League.objects.filter(is_active=True)
     leagues.prefetch_related('teams')
 
     this_league = League.objects.get(id=league_id)
@@ -78,6 +78,39 @@ def ics(request, team_id=None, team_name=None):
     )
 
     for game in games:
+        event = Event()
+        try:
+            event.add('summary', '%s vs. %s' % (game.home_team, game.away_team))
+        except Exception as e:
+            print e
+            pdb.set_trace()
+        event.add('dtstart', game.time)
+        event.add('dtend', game.time + timedelta(hours=1))
+        event.add('dtstamp', datetime.now())
+        event.add('location', "BreakAway Field %s" % game.field)
+        event['uid'] = '%s/%s@breakawaysports.com' % (now_string, shortuuid.uuid())
+        event.add('priority', 5)
+        cal.add_component(event)
+
+    return HttpResponse(cal.to_ical(), content_type='text/calendar')
+
+
+def master_ics(request):
+    cal = Calendar()
+    cal.add('prodid', '-//Breakway Schedules//mxm.dk//')
+    cal.add('version', '2.0')
+
+    now_dt = datetime.now()
+    now_string = "%04d%02d%02dT%02d%02d%02d" % (
+        now_dt.year,
+        now_dt.month,
+        now_dt.day,
+        now_dt.hour,
+        now_dt.minute,
+        now_dt.second
+    )
+
+    for game in Game.objects.filter(home_team__league__is_active=True):
         event = Event()
         try:
             event.add('summary', '%s vs. %s' % (game.home_team, game.away_team))
