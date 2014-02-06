@@ -1,10 +1,15 @@
 {% extends "home.html" %}
 {% load staticfiles %}
 
+{% block title %}{{ team.number }} - {{ team.name }}{% endblock %}
+
 {% block content %}
     <div class="container">
         <br>
         <table class="table table-bordered table-striped">
+            <tr>
+                <td colspan="2"><h3>{{ team }}</h3></td>
+            </tr>
             <tr>
                 <td><a href="{% url 'ics' team.name %}">Download Calendar</a></td>
                 <td>Today is {% now "l, F jS, Y g:i a"%}</td>
