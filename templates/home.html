@@ -28,11 +28,8 @@
 {% endblock %}
 
 {% block content %}
-    <iframe src="https://www.google.com/calendar/embed?showTitle=0&amp;showPrint=0&amp;mode=DAY&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=cooper.thompson%40gmail.com&amp;color=%232952A3&amp;ctz=America%2FChicago"
-            style=" border-width:0 "
-            width="600"
-            height="600"
-            frameborder="0"
-            scrolling="no">
+<div class="container">
+    <iframe src="https://www.google.com/calendar/embed?showTitle=0&amp;mode=DAY&amp;height=600&amp;wkst=1&amp;bgcolor=%23ffffff&amp;src=1vgdopfgecllu0qtclsb8va898%40group.calendar.google.com&amp;color=%2328754E&amp;ctz=America%2FChicago&amp;dates={% now "Ymd" %}%2F{% now "Ymd" %}" style=" border-width:0 " width="500" height="600" frameborder="0" scrolling="no">
     </iframe>
+</div>
 {% endblock %}
