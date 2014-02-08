@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.template import RequestContext, loader
 from breakaway.models import *
 from icalendar import Calendar, Event
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import pdb
 import shortuuid
 
@@ -11,9 +11,16 @@ def home(request):
     leagues = League.objects.filter(is_active=True)
     leagues.prefetch_related('teams')
 
+    today = date.today()
+    tomorrow = today + timedelta(days=1)
+    games = Game.objects.filter(time__gte=today)
+    games = games.filter(time__lt=tomorrow)
+    games = games.order_by("time", "field")
+
     template = loader.get_template('home.html')
     context = RequestContext(request, {
         'leagues': leagues,
+        'games': games,
     })
     return HttpResponse(template.render(context))
 
@@ -27,6 +34,7 @@ def team(request, team_id):
     away_games = Game.objects.filter(away_team=this_team)
 
     games = home_games | away_games
+    games = games.order_by("time", "field")
 
     template = loader.get_template('team.html')
     context = RequestContext(request, {
@@ -62,6 +70,7 @@ def ics(request, team_id=None, team_name=None):
     away_games = Game.objects.filter(away_team=this_team)
 
     games = home_games | away_games
+    games = games.order_by("time", "field")
 
     cal = Calendar()
     cal.add('prodid', '-//Breakway Schedules//mxm.dk//')
@@ -109,8 +118,9 @@ def master_ics(request):
         now_dt.minute,
         now_dt.second
     )
-
-    for game in Game.objects.filter(home_team__league__is_active=True):
+    games = Game.objects.filter(home_team__league__is_active=True)
+    games = games.order_by("time", "field")
+    for game in games:
         event = Event()
         try:
             event.add('summary', '%s vs. %s' % (game.home_team, game.away_team))

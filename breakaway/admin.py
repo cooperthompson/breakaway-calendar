@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core import urlresolvers
 from breakaway.models import *
 
 
@@ -10,18 +11,6 @@ class LeagueInline(admin.TabularInline):
 class SeasonAdmin(admin.ModelAdmin):
     inlines = [
         LeagueInline
-    ]
-
-
-class TeamInline(admin.TabularInline):
-    model = Team
-    fk_name = 'league'
-    ordering = ('number', )
-
-
-class LeagueAdmin(admin.ModelAdmin):
-    inlines = [
-        TeamInline
     ]
 
 
@@ -37,16 +26,28 @@ class AwayGameInline(admin.TabularInline):
     ordering = ('time',)
 
 
+class TeamInline(admin.TabularInline):
+    model = Team
+    fk_name = 'league'
+    ordering = ('number', )
+
+
+class LeagueAdmin(admin.ModelAdmin):
+    inlines = [
+        TeamInline
+    ]
+
+
 class TeamAdmin(admin.ModelAdmin):
     inlines = [
         HomeGameInline,
         AwayGameInline
-
     ]
+    list_filter = ['league']
 
 
 class GameAdmin(admin.ModelAdmin):
-    pass
+    list_filter = ['home_team__league']
 
 
 admin.site.register(Season, SeasonAdmin)

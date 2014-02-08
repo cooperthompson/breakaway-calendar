@@ -16,7 +16,7 @@ class League(models.Model):
     is_active = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return "%s" % self.name
+        return u"%s" % self.name
 
 
 class Team(models.Model):
@@ -29,7 +29,7 @@ class Team(models.Model):
         ordering = ['number']
 
     def __unicode__(self):
-        return "[%s] %s (%s)" % (self.number, self.name, self.color)
+        return u"[%s] %s (%s)" % (self.number, self.name, self.color)
 
 
 class Game(models.Model):
@@ -42,4 +42,4 @@ class Game(models.Model):
         ordering = ['time']
 
     def __unicode__(self):
-        return "%s vs. %s @%s" % (self.home_team, self.away_team, self.time)
+        return u"%s vs. %s @%s" % (self.home_team, self.away_team, self.time)

@@ -8,7 +8,9 @@
         <br>
         <table class="table table-bordered table-striped">
             <tr>
-                <td colspan="2"><h3>{{ team }}</h3></td>
+                <td colspan="2">
+                    <h3>{{ team }}</h3>
+                </td>
             </tr>
             <tr>
                 <td><a href="{% url 'ics' team.name %}">Download Calendar</a></td>
@@ -33,13 +35,13 @@
                     <td>
                         <a href="/team/{{ game.home_team.id }}"
                                 title="{{ game.home_team }}">
-                            {{ game.home_team.name }}
+                            {{ game.home_team.name }}({{ game.home_team.color }})
                         </a>
                     </td>
                     <td>
                         <a href="/team/{{ game.away_team.id }}"
                                 title="{{ game.away_team }}">
-                            {{ game.away_team.name }}
+                            {{ game.away_team.name }}({{ game.away_team.color }})
                         </a>
                     </td>
                     <td>{{ game.time|date:"M d (l)" }}</td>

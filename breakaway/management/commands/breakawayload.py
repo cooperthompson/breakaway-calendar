@@ -58,7 +58,7 @@ class Command(BaseCommand):
 
     def process_team_file(self, text_filename):
         self.league = self.get_league(text_filename)
-        text_file = open(text_filename, "r")
+        text_file = codecs.open(text_filename, encoding='utf-8', mode='r')
         mode = "start"
 
         for line in text_file:
@@ -114,7 +114,6 @@ class Command(BaseCommand):
     def process_game_file(self, text_filename):
         self.league = self.get_league(text_filename)
 
-        #text_file = open(text_filename, "r")
         text_file = codecs.open(text_filename, encoding='utf-8', mode='r')
 
         mode = "start"
