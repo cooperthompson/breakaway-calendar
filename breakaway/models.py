@@ -3,9 +3,9 @@ from django.db import models
 from smart_selects.db_fields import ChainedForeignKey
 
 
-class Season(models.Model):
-    name = models.CharField(max_length=100)
-    iscurrent = models.BooleanField(default=False)
+class Organization(models.Model):
+    name = models.CharField(max_length=25)
+    is_enabled = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -13,7 +13,7 @@ class Season(models.Model):
 
 class League(models.Model):
     name = models.CharField(max_length=100)
-    season = models.ForeignKey('Season', related_name='leagues', null=True, blank=True)
+    org = models.ForeignKey(Organization)
     key = models.CharField(max_length=100)
     is_active = models.BooleanField(default=False)
 
@@ -21,11 +21,34 @@ class League(models.Model):
         return u"%s" % self.name
 
 
+class Field(models.Model):
+    name = models.CharField(max_length=50)
+    address = models.CharField(max_length=300, blank=True, null=True)
+    is_open = models.BooleanField(default=True)
+    maps_link = models.URLField(verbose_name="Maps", blank=True, null=True)
+
+    def __unicode__(self):
+        return self.name
+
+
+class Staff(models.Model):
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+
+    def __unicode__(self):
+        return self.name
+
+
 class Team(models.Model):
     number = models.IntegerField()
     name = models.CharField(max_length=100)
-    color = models.CharField(max_length=100)
-    league = models.ForeignKey('League', related_name='teams')
+    color = models.CharField(max_length=100, blank=True, null=True)
+    club = models.CharField(max_length=100, blank=True, null=True)
+    level = models.CharField(max_length=50, blank=True, null=True)
+    league = models.ForeignKey(League)
+    manager = models.ForeignKey(Staff, blank=True, null=True, related_name='manager')
+    coach = models.ForeignKey(Staff, blank=True, null=True, related_name='coach')
 
     class Meta:
         ordering = ['number']
@@ -36,6 +59,11 @@ class Team(models.Model):
 
 class Game(models.Model):
     league = models.ForeignKey(League)
+    date = models.DateField()
+    time = models.TimeField()
+    field = models.ForeignKey(Field)
+    referee = models.ForeignKey(Staff, null=True, blank=True)
+
     home_team = ChainedForeignKey(Team,
                                   chained_field='league',
                                   chained_model_field='league',
@@ -44,9 +72,6 @@ class Game(models.Model):
                                   chained_field='league',
                                   chained_model_field='league',
                                   related_name='away_team')
-
-    time = models.DateTimeField()
-    field = models.IntegerField(default=1)
 
     @property
     def is_today(self):
