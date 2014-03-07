@@ -1,4 +1,6 @@
+from datetime import date
 from django.db import models
+from smart_selects.db_fields import ChainedForeignKey
 
 
 class Season(models.Model):
@@ -29,17 +31,39 @@ class Team(models.Model):
         ordering = ['number']
 
     def __unicode__(self):
-        return u"[%s] %s (%s)" % (self.number, self.name, self.color)
+        return u"[%s] %s" % (self.number, self.name)
 
 
 class Game(models.Model):
-    home_team = models.ForeignKey('Team', related_name="home_team")
-    away_team = models.ForeignKey('Team', related_name="away_team")
+    league = models.ForeignKey(League)
+    home_team = ChainedForeignKey(Team,
+                                  chained_field='league',
+                                  chained_model_field='league',
+                                  related_name='home_team')
+    away_team = ChainedForeignKey(Team,
+                                  chained_field='league',
+                                  chained_model_field='league',
+                                  related_name='away_team')
+
     time = models.DateTimeField()
     field = models.IntegerField(default=1)
+
+    @property
+    def is_today(self):
+        if self.time.date() == date.today():
+            return True
+        else:
+            return False
+
+    @property
+    def color_conflict(self):
+        if self.home_team.color.upper() == self.away_team.color.upper():
+            return True
+        else:
+            return False
 
     class Meta:
         ordering = ['time']
 
     def __unicode__(self):
-        return u"%s vs. %s @%s" % (self.home_team, self.away_team, self.time)
+        return u"%s vs. %s" % (self.home_team.name, self.away_team.name)

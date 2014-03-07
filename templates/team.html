@@ -10,11 +10,13 @@
             <tr>
                 <td colspan="2">
                     <h3>{{ team }}</h3>
+                    <a href="{% url 'league' team.league.id %}">{{ team.league }}</a>
                 </td>
             </tr>
             <tr>
                 <td><a href="{% url 'ics' team.name %}">Download Calendar</a></td>
                 <td>Today is {% now "l, F jS, Y g:i a"%}</td>
+
             </tr>
         </table>
 
@@ -43,8 +45,15 @@
                                 title="{{ game.away_team }}">
                             {{ game.away_team.name }}({{ game.away_team.color }})
                         </a>
+                        {% if game.color_conflict %}
+                            <span class="glyphicon glyphicon-flag" title="Color conflict"></span>
+                        {% endif %}
                     </td>
-                    <td>{{ game.time|date:"M d (l)" }}</td>
+                    <td>
+                        {{ game.time|date:"M d (l)" }}
+                        {% if game.is_today %}
+                            <span class="glyphicon glyphicon-calendar" title="Today"></span>
+                        {% endif %}</td>
                     <td>{{ game.time|time:"g:i a" }}</td>
                 </tr>
             {% endfor %}

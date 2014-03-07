@@ -177,15 +177,14 @@ class Command(BaseCommand):
                     self.stdout.write("Unable to determine game date/time: %s/%s" % (game_date, game_time))
                     return
 
+                league = home_team.league
                 game = Game(home_team=home_team,
                             away_team=away_team,
                             time=game_time,
-                            field=field)
-                self.stdout.write("Loaded game %s" % repr(game))
-                try:
-                    game.save()
-                except Exception as e:
-                    pdb.set_trace()
+                            field=field,
+                            league=league)
+                #self.stdout.write("Loaded game %s" % repr(game))
+                game.save()
 
             # handle the case where pdftotext didn't get the splitting right
             match_time = re.match("(\d+:\d{2})(\d?)$", line)
@@ -232,11 +231,13 @@ class Command(BaseCommand):
                     self.stdout.write("Unable to determine game date/time: %s/%s" % (game_date, game_time))
                     return
 
+                league = home_team.league
                 game = Game(home_team=home_team,
                             away_team=away_team,
                             time=game_time,
-                            field=field)
-                self.stdout.write("Loaded game %s" % repr(game))
+                            field=field,
+                            league=league)
+                #self.stdout.write("Loaded game %s" % repr(game))
                 game.save()
 
         return

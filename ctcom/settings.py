@@ -111,6 +111,11 @@ TEMPLATE_DIRS = (
     os.path.join(PROJECT_PATH, 'templates'),
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.core.context_processors.request",
+    "django.contrib.auth.context_processors.auth",
+)
+
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -122,6 +127,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 INSTALLED_APPS = (
+    'smart_selects',
+    'grappelli',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -137,9 +144,11 @@ ROOT_URLCONF = 'ctcom.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'ctcom.wsgi.application'
 
-TIME_INPUT_FORMATS = ('%I:%M %p',)
+#TIME_INPUT_FORMATS = ('%I:%M %p',)
 TIME_FORMAT = ('%I:%M %p',)
 
-DATETIME_INPUT_FORMATS = ('%m/%d/%Y %I:%M %p',)
+#DATETIME_INPUT_FORMATS = ('%m/%d/%Y %I:%M %p',)
 SHORT_DATETIME_FORMATS = ('%m/%d/%Y %I:%M %p',)
 DATETIME_FORMATS = ('%m/%d/%Y %I:%M %p',)
+
+GRAPPELLI_ADMIN_TITLE = "Breakaway Schedule"

@@ -57,14 +57,17 @@
                     <td>
                         <a href="/team/{{ game.home_team.id }}"
                                 title="{{ game.home_team }}">
-                            {{ game.home_team.name }}
+                            {{ game.home_team.name }}({{ game.home_team.color }})
                         </a>
                     </td>
                     <td>
                         <a href="/team/{{ game.away_team.id }}"
                                 title="{{ game.away_team }}">
-                            {{ game.away_team.name }}
+                            {{ game.away_team.name }}({{ game.away_team.color }})
                         </a>
+                        {% if game.color_conflict %}
+                            <span class="glyphicon glyphicon-flag" title="Color conflict"></span>
+                        {% endif %}
                     </td>
                     <td>{{ game.time|date:"M d (l)" }}</td>
                     <td>{{ game.time|time:"g:i a" }}</td>

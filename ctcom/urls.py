@@ -9,6 +9,10 @@ urlpatterns = patterns('',
                        url(r'^league/(?P<league_id>.+)/$', 'breakaway.views.league', name='league'),
                        url(r'^ics/Master.ics', 'breakaway.views.master_ics', name='master_ics'),
                        url(r'^ics/(?P<team_name>.+).ics', 'breakaway.views.ics', name='ics'),
-                       url(r'^admin/', include(admin.site.urls)))
+                       url(r'^admin/', include(admin.site.urls)),
+                       url(r'^chaining/', include('smart_selects.urls')),
+                       (r'^grappelli/', include('grappelli.urls')),  # grappelli URLS
+                       (r'^admin/',  include(admin.site.urls)),  # admin site
+)
 
 
